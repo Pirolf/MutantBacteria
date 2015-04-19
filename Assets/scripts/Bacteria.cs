@@ -17,9 +17,9 @@ public class Bacteria : MonoBehaviour {
 	void Start () {
 		ticks = 0.0f;
 		//amount = 1f;
-		amount = 5f*Mathf.PerlinNoise(transform.position.x, transform.position.y);
+		amount = 10f*Mathf.PerlinNoise(transform.position.x, transform.position.y);
 		float emptyRnd = Random.Range(0f,1.0f);
-		if(emptyRnd < 0.5f){
+		if(emptyRnd < 0.8f){
 			amount = 0f;
 		}
 		UpdateGridColor();
@@ -31,7 +31,7 @@ public class Bacteria : MonoBehaviour {
 	public IEnumerator RunLifeCycle(){
 		
 		while(true){
-			yield return new WaitForSeconds(3f);
+			yield return new WaitForSeconds(1f);
 			//Debug.Log("started life");
 			//count total neighgour's bacteria amount
 			float totalBacteria = 0f;
@@ -45,11 +45,23 @@ public class Bacteria : MonoBehaviour {
 			//plus self
 			totalBacteria += amount;
 			if(totalBacteria <= 0.0001f)continue;
-			float newBacteriaAmount = amount;
+			float newBacteriaAmount = amount*1/1.414f;
 			float randNeighbour = Random.Range(0, neighbours.Count);
 			Bacteria neighbourBacteria = neighbours[Mathf.FloorToInt(randNeighbour)].GetComponent<Bacteria>();
-			neighbourBacteria.amount
+			
+			if(amount < GameControl.maxBacteriaPerCell){
+				neighbourBacteria.amount
 				+= newBacteriaAmount;
+				float oldAmount = amount;
+				amount *= 1/1.414f;
+				GameControl.self.totalBacteria += (newBacteriaAmount + amount - oldAmount);
+			}else{
+				float oldAmount = amount;
+				amount *= 0.575f;
+				GameControl.self.totalBacteria += (amount - oldAmount);
+			}
+			
+			
 				/*
 			foreach(GameObject neighbour in neighbours){
 				if(float.IsNaN(neighbour.GetComponent<Bacteria>().amount))continue;
@@ -73,22 +85,13 @@ public class Bacteria : MonoBehaviour {
 			oldColor.r,
 			oldColor.g,
 			oldColor.b,
-			10f * Mathf.CeilToInt(amount/50f)/255f
+			amount/GameControl.maxBacteriaPerCell
+			//10f * Mathf.CeilToInt(amount/50f)/255f// 1/1275f * amount
 			);  
 	}
 	public void Init(int r, int c){
 		row = r;
 		col = c;
-		/*
-		amount = Mathf.PerlinNoise(transform.position.x, transform.position.y);
-		//Debug.Log(amount);
-		float emptyRnd = Random.Range(0f,1.0f);
-		if(emptyRnd < 0.9f){
-			amount = 0f;
-		}
-		UpdateGridColor();	
-		
-		*/
 		inited = true;
 	}
 	public void SetNeighbours(){

@@ -3,6 +3,8 @@ using System.Collections;
 
 public class GameControl : MonoBehaviour {
 	public static GameControl self;
+	public static float maxBacteriaPerCell;
+	public float totalBacteria = 0.0f;
 	public GameObject gridCellModel;
 	public GameObject[,] grid;
 	public Vector2 gridStart;
@@ -12,6 +14,7 @@ public class GameControl : MonoBehaviour {
 		grid = new GameObject[GameConfig.NUM_GRID_ROW, GameConfig.NUM_GRID_COL];
 		gridStart = new Vector2(-20f, 15f);
 		gridCellMargin = 0f;
+		maxBacteriaPerCell = 1275f;
 		Application.targetFrameRate = 150;
 	}
 	// Use this for initialization
@@ -20,7 +23,6 @@ public class GameControl : MonoBehaviour {
 		for(int i=0; i < grid.GetLength(0);i++){
 			for(int j=0; j < grid.GetLength(1);j++){
 				StartCoroutine(grid[i,j].GetComponent<Bacteria>().RunLifeCycle());
-				
 			}
 		}
 		
@@ -28,11 +30,6 @@ public class GameControl : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		for(int i=0; i < grid.GetLength(0);i++){
-			for(int j=0; j < grid.GetLength(1);j++){
-				grid[i,j].GetComponent<Bacteria>().RunLifeCycle();
-			}
-		}
 	}
 
 	void InitGrid(){
