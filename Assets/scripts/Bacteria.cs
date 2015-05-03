@@ -8,9 +8,15 @@ public class Bacteria : MonoBehaviour {
 	public List<GameObject> neighbours;
 	public float ticks;
 	public bool inited = false;
+	public float baseMutationRate;
+	public Color baseColor;
+
+	public BacteriaStrain strain;
 	void Awake(){
 		row = -1;
 		col = -1;
+		baseMutationRate = 0.05f;
+		baseColor = Color.white;
 		neighbours = new List<GameObject>();
 	}
 	// Use this for initialization
@@ -19,6 +25,7 @@ public class Bacteria : MonoBehaviour {
 		//amount = 1f;
 		amount = 10f*Mathf.PerlinNoise(transform.position.x, transform.position.y);
 		float emptyRnd = Random.Range(0f,1.0f);
+		GetComponent<SpriteRenderer>().color = baseColor;
 		if(emptyRnd < 0.8f){
 			amount = 0f;
 		}
@@ -46,6 +53,11 @@ public class Bacteria : MonoBehaviour {
 			totalBacteria += amount;
 			if(totalBacteria <= 0.0001f)continue;
 			float newBacteriaAmount = amount*1/1.414f;
+			float mutationRnd = Random.Range(0f, 100f);
+			if(mutationRnd < baseMutationRate * 100f){
+				//mutate
+				Mutate();
+			}
 			float randNeighbour = Random.Range(0, neighbours.Count);
 			Bacteria neighbourBacteria = neighbours[Mathf.FloorToInt(randNeighbour)].GetComponent<Bacteria>();
 			
@@ -57,27 +69,19 @@ public class Bacteria : MonoBehaviour {
 				GameControl.self.totalBacteria += (newBacteriaAmount + amount - oldAmount);
 			}else{
 				float oldAmount = amount;
-				amount *= 0.575f;
+				amount *= 0.575f;//sqrt of 1/3
 				GameControl.self.totalBacteria += (amount - oldAmount);
 			}
 			
-			
-				/*
-			foreach(GameObject neighbour in neighbours){
-				if(float.IsNaN(neighbour.GetComponent<Bacteria>().amount))continue;
-				float randNeighbour = Random.Range(0, neighbours.Count());
-
-				neighbour.GetComponent<Bacteria>().amount 
-					+= (neighbour.GetComponent<Bacteria>().amount/totalBacteria) * newBacteriaAmount;
-			}
-			amount += (amount/totalBacteria) * newBacteriaAmount;
-			*/
 			//update my color
 			UpdateGridColor();
 		}
 
 		
 	
+	}
+	public void Mutate(){
+
 	}
 	public void UpdateGridColor(){
 		Color oldColor = GetComponent<SpriteRenderer>().color;
@@ -86,7 +90,6 @@ public class Bacteria : MonoBehaviour {
 			oldColor.g,
 			oldColor.b,
 			amount/GameControl.maxBacteriaPerCell
-			//10f * Mathf.CeilToInt(amount/50f)/255f// 1/1275f * amount
 			);  
 	}
 	public void Init(int r, int c){

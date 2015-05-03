@@ -9,6 +9,14 @@ public class GameControl : MonoBehaviour {
 	public GameObject[,] grid;
 	public Vector2 gridStart;
 	public float gridCellMargin;
+
+	public Antibiotic selectedAntibiotic;
+	public GameObject brushhead;
+	public enum State{
+		HoldingAntibiotic,
+		PlayerIdle
+	};
+	public int state;
 	void Awake(){
 		self = this;
 		grid = new GameObject[GameConfig.NUM_GRID_ROW, GameConfig.NUM_GRID_COL];
@@ -16,6 +24,7 @@ public class GameControl : MonoBehaviour {
 		gridCellMargin = 0f;
 		maxBacteriaPerCell = 1275f;
 		Application.targetFrameRate = 150;
+		selectedAntibiotic = null;
 	}
 	// Use this for initialization
 	void Start () {
@@ -25,11 +34,20 @@ public class GameControl : MonoBehaviour {
 				StartCoroutine(grid[i,j].GetComponent<Bacteria>().RunLifeCycle());
 			}
 		}
-		
+		state = (int)State.PlayerIdle;
+		brushhead.SetActive(false);
 	}
 	
 	// Update is called once per frame
 	void Update () {
+		if(state == (int)State.HoldingAntibiotic){
+			//ray cast brush onto the grid
+			Vector3 mousePos = Input.mousePosition;
+			mousePos.z = 10.0f;
+			Vector3 brushPos = Camera.main.ScreenToWorldPoint(mousePos);
+			brushhead.transform.position = brushPos;
+			brushhead.SetActive(true);
+		}
 	}
 
 	void InitGrid(){

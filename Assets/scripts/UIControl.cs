@@ -8,7 +8,11 @@ public class UIControl : MonoBehaviour {
 	void Start () {
 	
 	}
-	
+	public void OnClickAntibiotic(){
+		//GameControl.self.selectedAntibiotic = ab;
+		GameControl.self.state = (int)GameControl.State.HoldingAntibiotic;
+
+	}
 	// Update is called once per frame
 	void Update () {
 		float totalBacteria = 0f;
@@ -17,7 +21,14 @@ public class UIControl : MonoBehaviour {
 				totalBacteria += GameControl.self.grid[i,j].GetComponent<Bacteria>().amount;
 			}
 		}
-		bacteriaCountText.text = totalBacteria.ToString("0");
+		if(totalBacteria > 1000000){
+			bacteriaCountText.text = (totalBacteria / 1000000f).ToString("0.00") + " M";
+		}else if(totalBacteria > 1000){
+			bacteriaCountText.text = (totalBacteria / 1000f).ToString("0.00") + " K";
+		}else{
+			bacteriaCountText.text = totalBacteria.ToString("0");
+		}
+		
 		//bacteriaCountText.text = GameControl.self.totalBacteria.ToString("0");
 	}
 }
