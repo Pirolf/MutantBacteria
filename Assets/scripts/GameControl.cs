@@ -45,8 +45,21 @@ public class GameControl : MonoBehaviour {
 			Vector3 mousePos = Input.mousePosition;
 			mousePos.z = 10.0f;
 			Vector3 brushPos = Camera.main.ScreenToWorldPoint(mousePos);
-			brushhead.transform.position = brushPos;
-			brushhead.SetActive(true);
+			//brushhead.transform.position = brushPos;
+			//brushhead.SetActive(true);
+			float cellWidth = gridCellModel.GetComponent<GridCell>().width;
+			int centerCell_j = Mathf.FloorToInt((brushPos.x-gridStart.x) / cellWidth);
+			int centerCell_i = Mathf.FloorToInt(-(brushPos.y-gridStart.y) / cellWidth);
+			//Debug.Log(centerCell_j + ", " + centerCell_i);
+			if(centerCell_j < 0 || centerCell_j >= grid.GetLength(1)
+				|| centerCell_i < 0 || centerCell_i >= grid.GetLength(0)){
+				return;
+			}
+
+			grid[centerCell_i,centerCell_j].GetComponent<SpriteRenderer>().color = Color.red;
+			if(Input.GetMouseButtonDown(0)){
+
+			}
 		}
 	}
 
