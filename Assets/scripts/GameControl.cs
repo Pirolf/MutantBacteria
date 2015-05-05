@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class GameControl : MonoBehaviour {
 	public static GameControl self;
@@ -17,6 +18,8 @@ public class GameControl : MonoBehaviour {
 		PlayerIdle
 	};
 	public int state;
+	private Stack<GameObject> prevBrushCells;
+
 	void Awake(){
 		self = this;
 		grid = new GameObject[GameConfig.NUM_GRID_ROW, GameConfig.NUM_GRID_COL];
@@ -28,6 +31,8 @@ public class GameControl : MonoBehaviour {
 	}
 	// Use this for initialization
 	void Start () {
+		prevBrushCells = new Stack<GameObject>();
+
 		InitGrid();
 		for(int i=0; i < grid.GetLength(0);i++){
 			for(int j=0; j < grid.GetLength(1);j++){
@@ -51,12 +56,36 @@ public class GameControl : MonoBehaviour {
 			int centerCell_j = Mathf.FloorToInt((brushPos.x-gridStart.x) / cellWidth);
 			int centerCell_i = Mathf.FloorToInt(-(brushPos.y-gridStart.y) / cellWidth);
 			//Debug.Log(centerCell_j + ", " + centerCell_i);
+			//clear previous colored cells
+			while(prevBrushCells.Count > 0){
+				GameObject p = prevBrushCells.Pop();
+				p.GetComponent<SpriteRenderer>().color = Color.white;
+			}
 			if(centerCell_j < 0 || centerCell_j >= grid.GetLength(1)
 				|| centerCell_i < 0 || centerCell_i >= grid.GetLength(0)){
 				return;
 			}
+			// 5 * 5 diamond
+			int offset = 2;
+			for(int k = -offset; k <= offset; k++){
+				//
+				for(int j = centerCell_j - offset + Mathf.Abs(k); 
+					j <= centerCell_j + offset - Mathf.Abs(k); 
+					j++){
+					int ci = centerCell_i + k;
+					int cj = j;
 
-			grid[centerCell_i,centerCell_j].GetComponent<SpriteRenderer>().color = Color.red;
+					//Debug.Log(ci + ", " + cj + " center: " + centerCell_i + "," + centerCell_j);
+					if(ci < 0 || ci >= grid.GetLength(0) 
+						|| cj < 0 || cj >= grid.GetLength(1)){
+						continue;
+					}
+					prevBrushCells.Push(grid[ci,cj]);
+					grid[ci,cj].GetComponent<SpriteRenderer>().color = Color.red;
+				}
+				
+			}
+			//grid[centerCell_i,centerCell_j].GetComponent<SpriteRenderer>().color = Color.red;
 			if(Input.GetMouseButtonDown(0)){
 
 			}
