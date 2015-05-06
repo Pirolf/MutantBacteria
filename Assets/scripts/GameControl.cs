@@ -10,7 +10,7 @@ public class GameControl : MonoBehaviour {
 	public GameObject[,] grid;
 	public Vector2 gridStart;
 	public float gridCellMargin;
-
+	public int brushSize;
 	public Antibiotic selectedAntibiotic;
 	public GameObject brushhead;
 	public enum State{
@@ -32,7 +32,7 @@ public class GameControl : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		prevBrushCells = new Stack<GameObject>();
-
+		brushSize = 5;
 		InitGrid();
 		for(int i=0; i < grid.GetLength(0);i++){
 			for(int j=0; j < grid.GetLength(1);j++){
@@ -46,52 +46,55 @@ public class GameControl : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		if(state == (int)State.HoldingAntibiotic){
-			//ray cast brush onto the grid
-			Vector3 mousePos = Input.mousePosition;
-			mousePos.z = 10.0f;
-			Vector3 brushPos = Camera.main.ScreenToWorldPoint(mousePos);
-			//brushhead.transform.position = brushPos;
-			//brushhead.SetActive(true);
-			float cellWidth = gridCellModel.GetComponent<GridCell>().width;
-			int centerCell_j = Mathf.FloorToInt((brushPos.x-gridStart.x) / cellWidth);
-			int centerCell_i = Mathf.FloorToInt(-(brushPos.y-gridStart.y) / cellWidth);
-			//Debug.Log(centerCell_j + ", " + centerCell_i);
+			int centerCell_i = 0, centerCell_j = 0;
+			ScreenPointToGridIndices(ref centerCell_i, ref centerCell_j);
+			//Debug.Log(centerCell_i + ", " + centerCell_j);
 			//clear previous colored cells
 			while(prevBrushCells.Count > 0){
 				GameObject p = prevBrushCells.Pop();
 				p.GetComponent<SpriteRenderer>().color = Color.white;
 			}
-			if(centerCell_j < 0 || centerCell_j >= grid.GetLength(1)
-				|| centerCell_i < 0 || centerCell_i >= grid.GetLength(0)){
-				return;
-			}
-			// 5 * 5 diamond
-			int offset = 2;
-			for(int k = -offset; k <= offset; k++){
-				//
-				for(int j = centerCell_j - offset + Mathf.Abs(k); 
-					j <= centerCell_j + offset - Mathf.Abs(k); 
-					j++){
-					int ci = centerCell_i + k;
-					int cj = j;
 
-					//Debug.Log(ci + ", " + cj + " center: " + centerCell_i + "," + centerCell_j);
-					if(ci < 0 || ci >= grid.GetLength(0) 
-						|| cj < 0 || cj >= grid.GetLength(1)){
-						continue;
-					}
-					prevBrushCells.Push(grid[ci,cj]);
-					grid[ci,cj].GetComponent<SpriteRenderer>().color = Color.red;
-				}
-				
-			}
-			//grid[centerCell_i,centerCell_j].GetComponent<SpriteRenderer>().color = Color.red;
+			if(!IndicesWithinBounds(centerCell_i, centerCell_j))return;
+			DrawBrush(centerCell_i, centerCell_j);
+			
 			if(Input.GetMouseButtonDown(0)){
 
 			}
 		}
 	}
+	void ScreenPointToGridIndices(ref int r, ref int c){
+		Vector3 mousePos = Input.mousePosition;
+		mousePos.z = 10.0f;
+		Vector3 brushPos = Camera.main.ScreenToWorldPoint(mousePos);
+		//brushhead.transform.position = brushPos;
+		//brushhead.SetActive(true);
+		float cellWidth = gridCellModel.GetComponent<GridCell>().width;
+		c = Mathf.FloorToInt((brushPos.x-gridStart.x) / cellWidth);
+		r = Mathf.FloorToInt(-(brushPos.y-gridStart.y) / cellWidth);
+	}
+	bool IndicesWithinBounds(int r, int c){
+		return c >= 0 && c < grid.GetLength(1)
+				&& r >= 0 && r < grid.GetLength(0);
+	}
+	//draws a dimond shape brush
+	void DrawBrush(int centerCell_i, int centerCell_j){
+		int offset = brushSize / 2;
+		for(int k = -offset; k <= offset; k++){
+			//
+			for(int j = centerCell_j - offset + Mathf.Abs(k); 
+				j <= centerCell_j + offset - Mathf.Abs(k); 
+				j++){
+				int ci = centerCell_i + k;
+				int cj = j;
 
+				if(!IndicesWithinBounds(ci, cj))continue;
+				prevBrushCells.Push(grid[ci,cj]);
+				grid[ci,cj].GetComponent<SpriteRenderer>().color = Color.red;
+			}
+			
+		}
+	}
 	void InitGrid(){
 		//clear grid
 		for(int i=0; i < grid.GetLength(0);i++){
