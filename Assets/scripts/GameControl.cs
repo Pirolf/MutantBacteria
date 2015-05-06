@@ -18,7 +18,14 @@ public class GameControl : MonoBehaviour {
 		PlayerIdle
 	};
 	public int state;
-	private Stack<GameObject> prevBrushCells;
+	private List<GameObject> prevBrushCells;
+
+	public void DropAntibiotic(){
+		Debug.Log("droppoing Antibiotic");
+		foreach(GameObject cell in prevBrushCells){
+
+		}
+	}
 
 	void Awake(){
 		self = this;
@@ -26,12 +33,12 @@ public class GameControl : MonoBehaviour {
 		gridStart = new Vector2(-20f, 15f);
 		gridCellMargin = 0f;
 		maxBacteriaPerCell = 1275f;
-		Application.targetFrameRate = 150;
+		Application.targetFrameRate = 200;
 		selectedAntibiotic = null;
 	}
 	// Use this for initialization
 	void Start () {
-		prevBrushCells = new Stack<GameObject>();
+		prevBrushCells = new List<GameObject>();
 		brushSize = 5;
 		InitGrid();
 		for(int i=0; i < grid.GetLength(0);i++){
@@ -51,15 +58,17 @@ public class GameControl : MonoBehaviour {
 			//Debug.Log(centerCell_i + ", " + centerCell_j);
 			//clear previous colored cells
 			while(prevBrushCells.Count > 0){
-				GameObject p = prevBrushCells.Pop();
+				GameObject p = prevBrushCells[0];
 				p.GetComponent<SpriteRenderer>().color = Color.white;
+				prevBrushCells.RemoveAt(0);
 			}
 
 			if(!IndicesWithinBounds(centerCell_i, centerCell_j))return;
 			DrawBrush(centerCell_i, centerCell_j);
 			
 			if(Input.GetMouseButtonDown(0)){
-
+				
+				DropAntibiotic();
 			}
 		}
 	}
@@ -89,7 +98,7 @@ public class GameControl : MonoBehaviour {
 				int cj = j;
 
 				if(!IndicesWithinBounds(ci, cj))continue;
-				prevBrushCells.Push(grid[ci,cj]);
+				prevBrushCells.Add(grid[ci,cj]);
 				grid[ci,cj].GetComponent<SpriteRenderer>().color = Color.red;
 			}
 			
