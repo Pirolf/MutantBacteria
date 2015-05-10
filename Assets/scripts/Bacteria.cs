@@ -10,6 +10,7 @@ public class Bacteria : MonoBehaviour {
 	public bool inited = false;
 	public float baseMutationRate;
 	public Color baseColor;
+	public Color previousColor; //used for brush moving
 
 	public BacteriaStrain strain;
 	void Awake(){
@@ -26,6 +27,7 @@ public class Bacteria : MonoBehaviour {
 		amount = 10f*Mathf.PerlinNoise(transform.position.x, transform.position.y);
 		float emptyRnd = Random.Range(0f,1.0f);
 		GetComponent<SpriteRenderer>().color = baseColor;
+		previousColor = GetComponent<SpriteRenderer>().color;
 		if(emptyRnd < 0.8f){
 			amount = 0f;
 		}
@@ -38,7 +40,7 @@ public class Bacteria : MonoBehaviour {
 	public IEnumerator RunLifeCycle(){
 		
 		while(true){
-			yield return new WaitForSeconds(1f);
+			yield return new WaitForSeconds(1.5f);
 			//Debug.Log("started life");
 			//count total neighgour's bacteria amount
 			float totalBacteria = 0f;
@@ -52,6 +54,15 @@ public class Bacteria : MonoBehaviour {
 			//plus self
 			totalBacteria += amount;
 			if(totalBacteria <= 0.0001f)continue;
+			if(GetComponent<GridCell>().antibiotics.Count > 0){
+				//die 100 or all (max(amount-100, 0))
+				Debug.Log("killing bac");
+				amount = Mathf.Max(amount-10000.0f,0f);
+				UpdateGridColor();
+				previousColor = GetComponent<SpriteRenderer>().color;
+				continue;
+
+			}
 			float newBacteriaAmount = amount*1/1.414f;
 			float mutationRnd = Random.Range(0f, 100f);
 			if(mutationRnd < baseMutationRate * 100f){

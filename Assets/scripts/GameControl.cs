@@ -18,12 +18,23 @@ public class GameControl : MonoBehaviour {
 		PlayerIdle
 	};
 	public int state;
-	private List<GameObject> prevBrushCells;
+	[SerializeField]private List<GameObject> prevBrushCells;
 
 	public void DropAntibiotic(){
-		Debug.Log("droppoing Antibiotic");
+		Debug.Log("dropping Antibiotic");
+		Dictionary<string, Antibiotic> abs;
+				
 		foreach(GameObject cell in prevBrushCells){
+			abs = cell.GetComponent<GridCell>().antibiotics;
 
+			if(abs.ContainsKey(selectedAntibiotic.name)){
+				Antibiotic ab = abs[selectedAntibiotic.name];
+				ab.amount += 1f;
+			}else{
+				Antibiotic ab = Instantiate(selectedAntibiotic) as Antibiotic;
+				ab.amount = 1f;
+				abs.Add(ab.name, ab);
+			}
 		}
 	}
 
@@ -34,7 +45,7 @@ public class GameControl : MonoBehaviour {
 		gridCellMargin = 0f;
 		maxBacteriaPerCell = 1275f;
 		Application.targetFrameRate = 200;
-		selectedAntibiotic = null;
+		//selectedAntibiotic = null;
 	}
 	// Use this for initialization
 	void Start () {
@@ -59,7 +70,7 @@ public class GameControl : MonoBehaviour {
 			//clear previous colored cells
 			while(prevBrushCells.Count > 0){
 				GameObject p = prevBrushCells[0];
-				p.GetComponent<SpriteRenderer>().color = Color.white;
+				p.GetComponent<SpriteRenderer>().color = p.GetComponent<Bacteria>().previousColor;
 				prevBrushCells.RemoveAt(0);
 			}
 
@@ -99,6 +110,8 @@ public class GameControl : MonoBehaviour {
 
 				if(!IndicesWithinBounds(ci, cj))continue;
 				prevBrushCells.Add(grid[ci,cj]);
+				grid[ci,cj].GetComponent<Bacteria>().previousColor 
+					= grid[ci,cj].GetComponent<SpriteRenderer>().color;
 				grid[ci,cj].GetComponent<SpriteRenderer>().color = Color.red;
 			}
 			
