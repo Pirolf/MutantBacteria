@@ -77,7 +77,7 @@ public class GameControl : MonoBehaviour {
 			if(!IndicesWithinBounds(centerCell_i, centerCell_j))return;
 			DrawBrush(centerCell_i, centerCell_j);
 			
-			if(Input.GetMouseButtonDown(0)){
+			if(Input.GetMouseButton(0)){
 				
 				DropAntibiotic();
 			}
