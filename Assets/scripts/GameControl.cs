@@ -13,6 +13,9 @@ public class GameControl : MonoBehaviour {
 	public int brushSize;
 	public Antibiotic selectedAntibiotic;
 	public GameObject brushhead;
+	public bool initFinished;
+	public float timeUntilNextUpdate;
+
 	public enum State{
 		HoldingAntibiotic,
 		PlayerIdle
@@ -39,12 +42,14 @@ public class GameControl : MonoBehaviour {
 	}
 
 	void Awake(){
+		initFinished = false;
 		self = this;
 		grid = new GameObject[GameConfig.NUM_GRID_ROW, GameConfig.NUM_GRID_COL];
 		gridStart = new Vector2(-20f, 15f);
 		gridCellMargin = 0f;
 		maxBacteriaPerCell = 1275f;
 		Application.targetFrameRate = 200;
+		timeUntilNextUpdate = 0.05f;
 		//selectedAntibiotic = null;
 	}
 	// Use this for initialization
@@ -52,17 +57,41 @@ public class GameControl : MonoBehaviour {
 		prevBrushCells = new List<GameObject>();
 		brushSize = 5;
 		InitGrid();
+		/*
 		for(int i=0; i < grid.GetLength(0);i++){
 			for(int j=0; j < grid.GetLength(1);j++){
 				StartCoroutine(grid[i,j].GetComponent<Bacteria>().RunLifeCycle());
 			}
 		}
+		*/
 		state = (int)State.PlayerIdle;
 		brushhead.SetActive(false);
+		initFinished = true;
+		//StartCoroutine(RunLifeCycle());
+
 	}
-	
+	void RunLifeCycle(){
+		int r = Mathf.FloorToInt(Random.Range(0, grid.GetLength(0)-0.01f));
+		int c = Mathf.FloorToInt(Random.Range(0, grid.GetLength(1)-0.01f));
+		grid[r,c].GetComponent<Bacteria>().RunLifeCycle();
+		/*)
+		for(int i=0; i < grid.GetLength(0);i++){
+			for(int j=0; j < grid.GetLength(1);j++){
+				//yield return new WaitForSeconds(0.05f);
+				grid[i,j].GetComponent<Bacteria>().RunLifeCycle();
+			}
+		}
+		*/
+	}
 	// Update is called once per frame
 	void Update () {
+		if(timeUntilNextUpdate > 0f){
+			timeUntilNextUpdate -= Time.deltaTime;
+		}else{
+			//RunLifeCycle();
+			timeUntilNextUpdate = 0.005f;
+		}
+		RunLifeCycle();
 		if(state == (int)State.HoldingAntibiotic){
 			int centerCell_i = 0, centerCell_j = 0;
 			ScreenPointToGridIndices(ref centerCell_i, ref centerCell_j);

@@ -9,6 +9,7 @@ public class Bacteria : MonoBehaviour {
 	public float ticks;
 	public bool inited = false;
 	public float baseMutationRate;
+	public float remainingTimeUntilNextUpdate;
 	public Color baseColor;
 	public Color previousColor; //used for brush moving
 
@@ -24,43 +25,53 @@ public class Bacteria : MonoBehaviour {
 	void Start () {
 		ticks = 0.0f;
 		//amount = 1f;
-		amount = 10f*Mathf.PerlinNoise(transform.position.x, transform.position.y);
-		float emptyRnd = Random.Range(0f,1.0f);
+		float perlinValue = Mathf.PerlinNoise(transform.position.x, transform.position.y);
+		
+		amount = 150f * perlinValue;
 		GetComponent<SpriteRenderer>().color = baseColor;
 		previousColor = GetComponent<SpriteRenderer>().color;
-		if(emptyRnd < 0.8f){
+		if(perlinValue < 0.8f){
 			amount = 0f;
 		}
 		UpdateGridColor();
+		remainingTimeUntilNextUpdate = 0.5f;
 	}
 	
 	// Update is called once per frame
 	void Update () {
+		/*
+		if(!GameControl.self.initFinished)return;
+		if(row < 0 || col < 0)return;
+		if(remainingTimeUntilNextUpdate >= 0f){
+			remainingTimeUntilNextUpdate -= Time.deltaTime;
+			return;
+		}
+		RunLifeCycle();
+		remainingTimeUntilNextUpdate = 0.5f;
+		*/
 	}
-	public IEnumerator RunLifeCycle(){
-		
-		while(true){
-			yield return new WaitForSeconds(1.5f);
+	public void RunLifeCycle(){
+			
 			//Debug.Log("started life");
 			//count total neighgour's bacteria amount
 			float totalBacteria = 0f;
-			if(amount < 0.0011f)continue;
+			if(amount < 0.0011f)return;
 			foreach(GameObject neighbour in neighbours){
 				if(float.IsNaN(neighbour.GetComponent<Bacteria>().amount)){
-					continue;
+					return;
 				}
 				totalBacteria += neighbour.GetComponent<Bacteria>().amount;
 			}
 			//plus self
 			totalBacteria += amount;
-			if(totalBacteria <= 0.0001f)continue;
+			if(totalBacteria <= 0.0001f)return;
 			if(GetComponent<GridCell>().antibiotics.Count > 0){
 				//die 100 or all (max(amount-100, 0))
 				Debug.Log("killing bac");
-				amount = Mathf.Max(amount-10000.0f,0f);
+				amount = Mathf.Max(amount-100.0f,0f);
 				UpdateGridColor();
 				previousColor = GetComponent<SpriteRenderer>().color;
-				continue;
+				return;
 
 			}
 			float newBacteriaAmount = amount*1/1.414f;
@@ -69,8 +80,9 @@ public class Bacteria : MonoBehaviour {
 				//mutate
 				Mutate();
 			}
-			float randNeighbour = Random.Range(0, neighbours.Count);
-			Bacteria neighbourBacteria = neighbours[Mathf.FloorToInt(randNeighbour)].GetComponent<Bacteria>();
+			float randNeighbour = Random.Range(0, neighbours.Count-0.01f);
+			Bacteria neighbourBacteria 
+				= neighbours[Mathf.FloorToInt(randNeighbour)].GetComponent<Bacteria>();
 			
 			if(amount < GameControl.maxBacteriaPerCell){
 				neighbourBacteria.amount
@@ -86,7 +98,7 @@ public class Bacteria : MonoBehaviour {
 			
 			//update my color
 			UpdateGridColor();
-		}
+		
 
 		
 	
