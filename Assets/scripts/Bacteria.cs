@@ -14,6 +14,7 @@ public class Bacteria : MonoBehaviour {
 	public Color previousColor; //used for brush moving
 
 	public BacteriaStrain strain;
+	
 	void Awake(){
 		row = -1;
 		col = -1;
@@ -86,6 +87,7 @@ public class Bacteria : MonoBehaviour {
 			Bacteria neighbourBacteria 
 				= neighbours[Mathf.FloorToInt(randNeighbour)].GetComponent<Bacteria>();
 			neighbourBacteria.baseColor = this.baseColor;
+
 			if(amount < GameControl.maxBacteriaPerCell){
 				neighbourBacteria.amount
 				+= newBacteriaAmount;
