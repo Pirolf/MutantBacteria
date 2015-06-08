@@ -18,7 +18,7 @@ public class Bacteria : MonoBehaviour {
 		row = -1;
 		col = -1;
 		baseMutationRate = 0.05f;
-		baseColor = Color.white;
+		//baseColor = Color.blue;
 		neighbours = new List<GameObject>();
 	}
 	// Use this for initialization
@@ -79,11 +79,13 @@ public class Bacteria : MonoBehaviour {
 			if(mutationRnd < baseMutationRate * 100f){
 				//mutate
 				Mutate();
+				//spread
+
 			}
 			float randNeighbour = Random.Range(0, neighbours.Count-0.01f);
 			Bacteria neighbourBacteria 
 				= neighbours[Mathf.FloorToInt(randNeighbour)].GetComponent<Bacteria>();
-			
+			neighbourBacteria.baseColor = this.baseColor;
 			if(amount < GameControl.maxBacteriaPerCell){
 				neighbourBacteria.amount
 				+= newBacteriaAmount;
@@ -104,10 +106,13 @@ public class Bacteria : MonoBehaviour {
 	
 	}
 	public void Mutate(){
+		GetComponent<SpriteRenderer>().color = Color.yellow;
+		baseColor = Color.yellow;
 
 	}
 	public void UpdateGridColor(){
 		Color oldColor = GetComponent<SpriteRenderer>().color;
+		
 		GetComponent<SpriteRenderer>().color = new Color(
 			oldColor.r,
 			oldColor.g,
