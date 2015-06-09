@@ -18,7 +18,8 @@ public class UIControl : MonoBehaviour {
 		float totalBacteria = 0f;
 		for(int i=0; i < GameControl.self.grid.GetLength(0);i++){
 			for(int j=0; j < GameControl.self.grid.GetLength(1);j++){
-				totalBacteria += GameControl.self.grid[i,j].GetComponent<Bacteria>().amount;
+				if(GameControl.self.grid[i,j].GetComponent<Bacteria>() != null)
+					totalBacteria += GameControl.self.grid[i,j].GetComponent<Bacteria>().amount;
 			}
 		}
 		if(totalBacteria > 1000000){

@@ -7,23 +7,31 @@ public class Bacteria : MonoBehaviour {
 	public int col ;
 	public List<GameObject> neighbours;
 	public float ticks;
-	public bool inited = false;
+	
+	public int mutationTimes; // max number of mutations
+	public int minMutations;
+	public int maxMutations;
+
 	public float baseMutationRate;
 	public float remainingTimeUntilNextUpdate;
 	public Color baseColor;
 	public Color previousColor; //used for brush moving
 
 	public BacteriaStrain strain;
-
-	void Awake(){
+	public string nextGenBacteriaType; // next generation to mutate into
+	public static float sqrt2 = Mathf.Sqrt(2f);
+	public static float sqrt3 = Mathf.Sqrt(3f);
+	public virtual void Awake(){
 		row = -1;
 		col = -1;
 		baseMutationRate = 0.05f;
-		//baseColor = Color.blue;
 		neighbours = new List<GameObject>();
+		minMutations = 5;
+		maxMutations = 8;
+		nextGenBacteriaType = "BacteriaMuggle";
 	}
 	// Use this for initialization
-	void Start () {
+	public virtual void Start () {
 		ticks = 0.0f;
 		//amount = 1f;
 		float perlinValue = Mathf.PerlinNoise(transform.position.x, transform.position.y);
@@ -40,17 +48,9 @@ public class Bacteria : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		/*
-		if(!GameControl.self.initFinished)return;
-		if(row < 0 || col < 0)return;
-		if(remainingTimeUntilNextUpdate >= 0f){
-			remainingTimeUntilNextUpdate -= Time.deltaTime;
-			return;
-		}
-		RunLifeCycle();
-		remainingTimeUntilNextUpdate = 0.5f;
-		*/
+		
 	}
+
 	public void RunLifeCycle(){
 			
 			//Debug.Log("started life");
@@ -75,12 +75,20 @@ public class Bacteria : MonoBehaviour {
 				return;
 
 			}
-			float newBacteriaAmount = amount*1/1.414f;
+			float newBacteriaAmount = amount*1/sqrt2;
 			float mutationRnd = Random.Range(0f, 100f);
 			if(mutationRnd < baseMutationRate * 100f){
 				//mutate
-				Mutate();
-				//spread
+				if(nextGenBacteriaType != ""){
+					Mutate();
+					Destroy(GetComponent<Bacteria>());
+					gameObject.AddComponent<BacteriaMuggle>();
+					GetComponent<BacteriaMuggle>().row = row;
+					GetComponent<BacteriaMuggle>().col = col;
+					GetComponent<BacteriaMuggle>().neighbours = neighbours;
+					return;
+				}
+
 
 			}
 			float randNeighbour = Random.Range(0, neighbours.Count-0.01f);
@@ -92,20 +100,16 @@ public class Bacteria : MonoBehaviour {
 				neighbourBacteria.amount
 				+= newBacteriaAmount;
 				float oldAmount = amount;
-				amount *= 1/1.414f;
+				amount *= 1/sqrt2;
 				GameControl.self.totalBacteria += (newBacteriaAmount + amount - oldAmount);
 			}else{
 				float oldAmount = amount;
-				amount *= 0.575f;//sqrt of 1/3
+				amount *= 1/sqrt3;//sqrt of 1/3
 				GameControl.self.totalBacteria += (amount - oldAmount);
 			}
 			
 			//update my color
 			UpdateGridColor();
-		
-
-		
-	
 	}
 	public void Mutate(){
 
@@ -114,6 +118,7 @@ public class Bacteria : MonoBehaviour {
 		baseColor = newBaseColor;
 		Debug.Log("mutate!");
 		UpdateGridColor();
+
 	}
 	public void UpdateGridColor(){
 		float h=0,s=0,v=0;
@@ -122,25 +127,15 @@ public class Bacteria : MonoBehaviour {
 		//Debug.Log("oldColor: " + oldColor);
 		Utils.RGB2HSV(baseColor.r,baseColor.g,baseColor.b,
 		 			  ref h, ref s, ref v);
-		v = 75f/255f + amount/GameControl.maxBacteriaPerCell;
+		v = Mathf.Min(240f/255f, 75f/255f + amount/GameControl.maxBacteriaPerCell);
 		//Debug.Log(v);
 		Color newColor = Utils.HSV2RGB(h,s,v, 1f);
-		//if(newColor.r > 0 || newColor.g > 0 || newColor.b > 0)
-		//Debug.Log(newColor);
-		/*
-		GetComponent<SpriteRenderer>().color = new Color(
-			oldColor.r,
-			oldColor.g,
-			oldColor.b,
-			amount/GameControl.maxBacteriaPerCell
-			);  
-		*/
+		
 		GetComponent<SpriteRenderer>().color = newColor;
 	}
 	public void Init(int r, int c){
 		row = r;
 		col = c;
-		inited = true;
 	}
 	public void SetNeighbours(){
 		//add neighbours
