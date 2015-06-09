@@ -47,7 +47,7 @@ public class GameControl : MonoBehaviour {
 		grid = new GameObject[GameConfig.NUM_GRID_ROW, GameConfig.NUM_GRID_COL];
 		gridStart = new Vector2(-20f, 15f);
 		gridCellMargin = 0f;
-		maxBacteriaPerCell = 1275f;
+		maxBacteriaPerCell = 800f;
 		Application.targetFrameRate = 200;
 		timeUntilNextUpdate = 0.05f;
 		//selectedAntibiotic = null;

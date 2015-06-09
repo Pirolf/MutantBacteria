@@ -1,7 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Util : MonoBehaviour {
+public class Utils : MonoBehaviour {
+	//r,g,b [0,1]
+	//h: [0, 360)
+	//s, v: [0,1]
 	public static void RGB2HSV( float r, float g, float b, ref float h, ref float s, ref float v )
 	{
 		float min, max, delta;
@@ -31,10 +34,11 @@ public class Util : MonoBehaviour {
 	//s: [0, 1]
 	//v: [0, 1]
 	//r,g,b: [0,1]
-	public static Color HSVtoRGB(float h, float s, float v, float a, ref float r, ref float g, ref float b )
+	public static Color HSV2RGB(float h, float s, float v, float a)
 	{
 		int i;
 		float f, p, q, t;
+		float r,g,b;
 		if( s == 0 ) {
 			// achromatic (grey)
 			r = g = b = v;

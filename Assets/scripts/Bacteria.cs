@@ -14,7 +14,7 @@ public class Bacteria : MonoBehaviour {
 	public Color previousColor; //used for brush moving
 
 	public BacteriaStrain strain;
-	
+
 	void Awake(){
 		row = -1;
 		col = -1;
@@ -108,19 +108,34 @@ public class Bacteria : MonoBehaviour {
 	
 	}
 	public void Mutate(){
-		GetComponent<SpriteRenderer>().color = Color.yellow;
-		baseColor = Color.yellow;
 
+		float h=50f, s=166/255f, v=75/255f;
+		Color newBaseColor = Utils.HSV2RGB(h,s,v,1f);
+		baseColor = newBaseColor;
+		Debug.Log("mutate!");
+		UpdateGridColor();
 	}
 	public void UpdateGridColor(){
-		Color oldColor = GetComponent<SpriteRenderer>().color;
-		
+		float h=0,s=0,v=0;
+		float r=0,g=0,b=0;
+		//Color oldColor = GetComponent<SpriteRenderer>().color;
+		//Debug.Log("oldColor: " + oldColor);
+		Utils.RGB2HSV(baseColor.r,baseColor.g,baseColor.b,
+		 			  ref h, ref s, ref v);
+		v = 75f/255f + amount/GameControl.maxBacteriaPerCell;
+		//Debug.Log(v);
+		Color newColor = Utils.HSV2RGB(h,s,v, 1f);
+		//if(newColor.r > 0 || newColor.g > 0 || newColor.b > 0)
+		//Debug.Log(newColor);
+		/*
 		GetComponent<SpriteRenderer>().color = new Color(
 			oldColor.r,
 			oldColor.g,
 			oldColor.b,
 			amount/GameControl.maxBacteriaPerCell
 			);  
+		*/
+		GetComponent<SpriteRenderer>().color = newColor;
 	}
 	public void Init(int r, int c){
 		row = r;
