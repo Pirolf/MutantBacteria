@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 public class GameControl : MonoBehaviour {
 	public static GameControl self;
@@ -50,38 +51,21 @@ public class GameControl : MonoBehaviour {
 		maxBacteriaPerCell = 800f;
 		Application.targetFrameRate = 200;
 		timeUntilNextUpdate = 0.05f;
-		//selectedAntibiotic = null;
 	}
 	// Use this for initialization
 	void Start () {
 		prevBrushCells = new List<GameObject>();
 		brushSize = 5;
 		InitGrid();
-		/*
-		for(int i=0; i < grid.GetLength(0);i++){
-			for(int j=0; j < grid.GetLength(1);j++){
-				StartCoroutine(grid[i,j].GetComponent<Bacteria>().RunLifeCycle());
-			}
-		}
-		*/
 		state = (int)State.PlayerIdle;
 		brushhead.SetActive(false);
 		initFinished = true;
-		//StartCoroutine(RunLifeCycle());
 
 	}
 	void RunLifeCycle(){
 		int r = Mathf.FloorToInt(Random.Range(0, grid.GetLength(0)-0.01f));
 		int c = Mathf.FloorToInt(Random.Range(0, grid.GetLength(1)-0.01f));
 		grid[r,c].GetComponent<Bacteria>().RunLifeCycle();
-		/*)
-		for(int i=0; i < grid.GetLength(0);i++){
-			for(int j=0; j < grid.GetLength(1);j++){
-				//yield return new WaitForSeconds(0.05f);
-				grid[i,j].GetComponent<Bacteria>().RunLifeCycle();
-			}
-		}
-		*/
 	}
 	// Update is called once per frame
 	void Update () {

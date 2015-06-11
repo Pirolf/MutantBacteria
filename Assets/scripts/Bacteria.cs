@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
+using System;
 public class Bacteria : MonoBehaviour {
 	public float amount;
 	public int row ;
@@ -18,7 +20,7 @@ public class Bacteria : MonoBehaviour {
 	public Color previousColor; //used for brush moving
 
 	public BacteriaStrain strain;
-	public string nextGenBacteriaType; // next generation to mutate into
+	public Type nextGenBacteriaType; // next generation to mutate into
 	public static float sqrt2 = Mathf.Sqrt(2f);
 	public static float sqrt3 = Mathf.Sqrt(3f);
 	public virtual void Awake(){
@@ -28,7 +30,7 @@ public class Bacteria : MonoBehaviour {
 		neighbours = new List<GameObject>();
 		minMutations = 5;
 		maxMutations = 8;
-		nextGenBacteriaType = "BacteriaMuggle";
+		nextGenBacteriaType = typeof(BacteriaMuggle);
 	}
 	// Use this for initialization
 	public virtual void Start () {
@@ -42,6 +44,7 @@ public class Bacteria : MonoBehaviour {
 		if(perlinValue < 0.8f){
 			amount = 0f;
 		}
+		
 		UpdateGridColor();
 		remainingTimeUntilNextUpdate = 0.5f;
 	}
@@ -76,26 +79,24 @@ public class Bacteria : MonoBehaviour {
 
 			}
 			float newBacteriaAmount = amount*1/sqrt2;
-			float mutationRnd = Random.Range(0f, 100f);
-			if(mutationRnd < baseMutationRate * 100f){
+			float mutationRnd = UnityEngine.Random.Range(0f, 100f);
+			if(mutationRnd < baseMutationRate * 100f && Time.time > 60f){
 				//mutate
-				if(nextGenBacteriaType != ""){
+				if(nextGenBacteriaType != null){
 					Mutate();
 					Destroy(GetComponent<Bacteria>());
-					gameObject.AddComponent<BacteriaMuggle>();
-					GetComponent<BacteriaMuggle>().row = row;
-					GetComponent<BacteriaMuggle>().col = col;
-					GetComponent<BacteriaMuggle>().neighbours = neighbours;
+					gameObject.AddComponent(nextGenBacteriaType);
+					(GetComponent(nextGenBacteriaType.Name) as Bacteria).row = row;
+					(GetComponent(nextGenBacteriaType.Name) as Bacteria).col = col;
+					(GetComponent(nextGenBacteriaType.Name) as Bacteria).neighbours = neighbours;
 					return;
 				}
-
-
 			}
-			float randNeighbour = Random.Range(0, neighbours.Count-0.01f);
+			float randNeighbour = UnityEngine.Random.Range(0, neighbours.Count-0.01f);
 			Bacteria neighbourBacteria 
 				= neighbours[Mathf.FloorToInt(randNeighbour)].GetComponent<Bacteria>();
 			neighbourBacteria.baseColor = this.baseColor;
-
+			
 			if(amount < GameControl.maxBacteriaPerCell){
 				neighbourBacteria.amount
 				+= newBacteriaAmount;
@@ -107,6 +108,7 @@ public class Bacteria : MonoBehaviour {
 				amount *= 1/sqrt3;//sqrt of 1/3
 				GameControl.self.totalBacteria += (amount - oldAmount);
 			}
+
 			
 			//update my color
 			UpdateGridColor();
@@ -127,7 +129,7 @@ public class Bacteria : MonoBehaviour {
 		//Debug.Log("oldColor: " + oldColor);
 		Utils.RGB2HSV(baseColor.r,baseColor.g,baseColor.b,
 		 			  ref h, ref s, ref v);
-		v = Mathf.Min(240f/255f, 75f/255f + amount/GameControl.maxBacteriaPerCell);
+		v = Mathf.Min(240f/255f, 60f/255f + amount/GameControl.maxBacteriaPerCell);
 		//Debug.Log(v);
 		Color newColor = Utils.HSV2RGB(h,s,v, 1f);
 		
